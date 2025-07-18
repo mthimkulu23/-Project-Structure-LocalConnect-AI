@@ -1,4 +1,4 @@
-treamlit # <-- CORRECTED THIS LINE
+streamlit # <-- CORRECTED THIS LINE
 requests
 python-dotenv
 fastapi
