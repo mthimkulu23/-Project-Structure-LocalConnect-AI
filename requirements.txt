@@ -1,4 +1,4 @@
-treamlit
+treamlit # <-- CORRECTED THIS LINE
 requests
 python-dotenv
 fastapi
