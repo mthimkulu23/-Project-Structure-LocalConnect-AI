@@ -66,7 +66,7 @@ Follow these steps to set up and run LocalConnect AI on your local machine for d
     ```env
     # .env file content
     GROQ_API_KEY="gsk_YOUR_GROQ_API_KEY_HERE"
-    # Example: GROQ_API_KEY="gsk_abcdef1234567890abcdef1234567890"
+    # Example: GROQ_API_KEY="hbhhikiuhgvvtgvgt"
     
     OPENCAGE_API_KEY="YOUR_OPENCAGE_API_KEY_HERE"
     # Example: OPENCAGE_API_KEY="your_opencage_key_xyz"
