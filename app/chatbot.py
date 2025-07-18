@@ -5,8 +5,6 @@ import os
 from dotenv import load_dotenv # Make sure this is imported if you're loading .env
 
 
-# No need for this if we're not using LocationManager or search_local_services
-# from app.services import LocationManager, search_local_services
 
 
 class LocalConnectChatbot:
@@ -16,7 +14,7 @@ class LocalConnectChatbot:
 
             self.llm = ChatGoogleGenerativeAI(
                 model="gemini-1.5-flash",
-                google_api_key=os.getenv("GOOGLE_API_KEY"), # This is for Gemini
+                google_api_key=os.getenv("GOOGLE_API_KEY"), 
                 temperature=0.7
             )
             print("Google Gemini client initialized.")
