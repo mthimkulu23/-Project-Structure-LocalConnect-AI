@@ -151,7 +151,6 @@ if __name__ == "__main__":
     async def test_geocoding_and_search():
         location_manager = LocationManager()
         johannesburg_coords = None
-        # This will now print errors/warnings if API key is not valid/billed
         johannesburg_geocode_data = await location_manager.geocode_location("Johannesburg")
         if johannesburg_geocode_data:
             johannesburg_coords = (johannesburg_geocode_data['latitude'], johannesburg_geocode_data['longitude'])
@@ -172,14 +171,13 @@ if __name__ == "__main__":
 
 
         print("\n--- Testing search_local_services (will use Google Places/mock) ---")
-        # These will now likely fall back to mock data
+       
         police_stations_jhb = await search_local_services('police station', location_coords=johannesburg_coords, location_name="Johannesburg")
         print(f"Police Stations in Johannesburg: {police_stations_jhb}")
 
         dentists_cpt = await search_local_services('dentist', location_coords=cape_town_coords, location_name="Cape Town")
         print(f"Dentists in Cape Town: {dentists_cpt}")
 
-        # Test search without specific location or for types not handled by Google (will fall back to mock)
         restaurants_general = await search_local_services('restaurant', location_name="Johannesburg")
         print(f"Restaurants in Johannesburg (mock fallback): {restaurants_general}")
 
