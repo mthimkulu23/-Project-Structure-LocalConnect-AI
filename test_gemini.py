@@ -1,13 +1,13 @@
-# test_gemini.py
+
 
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+
 load_dotenv()
 
-# Get your Gemini API key from the environment variable
+
 GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 if not GEMINI_API_KEY:

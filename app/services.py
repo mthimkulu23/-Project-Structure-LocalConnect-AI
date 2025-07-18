@@ -1,9 +1,6 @@
-# LocalConnectAI/app/services.py
-
 import os
 import requests
 
-# --- LocationManager Class (Now uses Google Geocoding API, but will fail gracefully) ---
 class LocationManager:
     def __init__(self):
         self.google_api_key = os.getenv("GOOGLE_PLACES_API_KEY") # We still try to get it
@@ -11,8 +8,7 @@ class LocationManager:
             print("WARNING: GOOGLE_PLACES_API_KEY not found in environment variables. Google Geocoding will not work.")
             self.geocoder_initialized = False
         else:
-            # We assume if the key is present, the user intends to use it,
-            # but it will fail at the request stage if billing/APIs aren't enabled.
+    
             print("Google Geocoding client initialized (API key found).")
             self.geocoder_initialized = True
 
@@ -34,7 +30,7 @@ class LocationManager:
 
         try:
             response = requests.get(base_url, params=params)
-            response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
+            response.raise_for_status() 
             data = response.json()
 
             if data.get("status") == "OK" and data.get("results"):
@@ -48,7 +44,6 @@ class LocationManager:
                     "address": formatted_address
                 }
             else:
-                # This block will likely be hit if status is "REQUEST_DENIED" (API Key issues, billing)
                 print(f"Google Geocoding failed for: {location_name}. Status: {data.get('status')}. Message: {data.get('error_message', 'No error message provided')}")
                 return None
         except requests.exceptions.RequestException as e:
@@ -58,7 +53,6 @@ class LocationManager:
             print(f"An unexpected error occurred during Google Geocoding API call: {e}")
             return None
 
-# --- Existing Google Places Search Function (Will also fail gracefully) ---
 def _search_google_places(query: str, location_coords: tuple = None, radius: int = 5000) -> list:
     """
     Searches Google Places API for establishments.
@@ -78,11 +72,11 @@ def _search_google_places(query: str, location_coords: tuple = None, radius: int
 
     if location_coords and isinstance(location_coords, tuple) and len(location_coords) == 2:
         params["location"] = f"{location_coords[0]},{location_coords[1]}"
-        params["radius"] = radius # in meters
+        params["radius"] = radius 
 
     try:
         response = requests.get(base_url, params=params)
-        response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
+        response.raise_for_status() 
         data = response.json()
 
         if data.get("status") == "OK":
@@ -97,7 +91,6 @@ def _search_google_places(query: str, location_coords: tuple = None, radius: int
                 })
             return places
         else:
-            # This block will likely be hit if status is "REQUEST_DENIED" (API Key issues, billing)
             print(f"Google Places search failed for: '{query}'. Status: {data.get('status')}. Message: {data.get('error_message', 'No error message provided')}")
             return []
     except requests.exceptions.RequestException as e:
@@ -108,7 +101,6 @@ def _search_google_places(query: str, location_coords: tuple = None, radius: int
         return []
 
 
-# --- Modified search_local_services to use Google Places or mock data ---
 async def search_local_services(service_type: str, location_coords: tuple = None, location_name: str = "") -> list:
     """
     Searches for local services based on type, optionally using geocoded coordinates.
@@ -117,7 +109,6 @@ async def search_local_services(service_type: str, location_coords: tuple = None
     """
     google_places_api_key = os.getenv("GOOGLE_PLACES_API_KEY")
     if google_places_api_key:
-        # We still attempt to search, but it will gracefully fail if the key/billing is an issue
         print(f"Attempting to search '{service_type}' via Google Places API (will only work if API key is valid and billed)...")
         results = _search_google_places(service_type, location_coords)
         if results:
@@ -146,19 +137,16 @@ async def search_local_services(service_type: str, location_coords: tuple = None
     results = []
     if service_type in mock_services:
         for service in mock_services[service_type]:
-            # Basic filtering for mock data - you'd likely want to improve this
-            # if location_name is provided, try to match it
+         
             if location_name and location_name.lower() in service['address'].lower():
                 results.append(service)
-            elif not location_name: # If no specific location name, return all mock for the type
+            elif not location_name: 
                 results.append(service)
 
     return results
 
 if __name__ == "__main__":
-    # Example usage for testing purposes
-    # To run this __main__ block, you might need to manually set env vars
-    # os.environ["GOOGLE_PLACES_API_KEY"] = "YOUR_GOOGLE_PLACES_KEY" # Make sure this is set if testing via __main__
+
 
     async def test_geocoding_and_search():
         location_manager = LocationManager()
@@ -170,7 +158,7 @@ if __name__ == "__main__":
             print(f"Johannesburg geocoded: {johannesburg_geocode_data}")
         else:
             print("Johannesburg geocoding failed, using dummy coords for testing search fallback.")
-            johannesburg_coords = (-26.2041, 28.0473) # Dummy coords for JHB if geocoding fails
+            johannesburg_coords = (-26.2041, 28.0473) 
 
 
         cape_town_coords = None
@@ -180,7 +168,7 @@ if __name__ == "__main__":
             print(f"Cape Town geocoded: {cape_town_geocode_data}")
         else:
             print("Cape Town geocoding failed, using dummy coords for testing search fallback.")
-            cape_town_coords = (-33.9249, 18.4241) # Dummy coords for CPT if geocoding fails
+            cape_town_coords = (-33.9249, 18.4241) 
 
 
         print("\n--- Testing search_local_services (will use Google Places/mock) ---")

@@ -135,7 +135,8 @@ if prompt := st.chat_input("Ask me Anything,"):
 st.markdown(
     """
     <div style="text-align: center; margin-top: 50px; font-size: 0.8em; color: grey;">
-        Powered by LocalConnect AI
+        Powered by LocalConnect AI 
+      
     </div>
     """,
     unsafe_allow_html=True
