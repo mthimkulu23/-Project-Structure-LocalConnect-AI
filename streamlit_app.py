@@ -10,7 +10,7 @@ load_dotenv()
 
 
 st.set_page_config(
-    page_title="LocalConnect AI Chat",
+    page_title="Local Connect AI Chat",
     page_icon="💬",
     layout="centered", 
     initial_sidebar_state="collapsed"

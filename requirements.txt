@@ -1,8 +1,8 @@
+treamlit
+requests
+python-dotenv
 fastapi
 uvicorn
-python-dotenv
 langchain
-langchain-core # Ensure this is also present if you're using LangChain
-langchain-groq # <--- ADD THIS LINE
-# You can also remove 'langchain-google-genai' if you're fully switching from Gemini API
-# requests # Might also be needed for your backend if it makes external calls
+langchain-core # Ensure this is present if your langchain version needs it
+langchain-groq # <--- New package for Groq
