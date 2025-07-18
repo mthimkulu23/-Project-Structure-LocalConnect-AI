@@ -1,58 +1,45 @@
 import os
 import requests
+# Import the geocoding function from your utils.py
+from app.utils import geocode_location # Assuming app.utils can be imported like this
 
 class LocationManager:
     def __init__(self):
-        self.google_api_key = os.getenv("GOOGLE_PLACES_API_KEY") # We still try to get it
-        if not self.google_api_key:
-            print("WARNING: GOOGLE_PLACES_API_KEY not found in environment variables. Google Geocoding will not work.")
-            self.geocoder_initialized = False
-        else:
-    
-            print("Google Geocoding client initialized (API key found).")
-            self.geocoder_initialized = True
+        # No need for GOOGLE_PLACES_API_KEY here if we're using OpenCage for geocoding
+        # self.google_api_key = os.getenv("GOOGLE_PLACES_API_KEY")
+        # if not self.google_api_key:
+        #     print("WARNING: GOOGLE_PLACES_API_KEY not found... Google Geocoding will not work.")
+        #     self.geocoder_initialized = False
+        # else:
+        #     print("Google Geocoding client initialized (API key found).")
+        #     self.geocoder_initialized = True
+        
+        # We will rely on app.utils.geocode_location which uses OPENCAGE_API_KEY
+        # You might still want a check for OPENCAGE_API_KEY here if you initialize LocationManager in a place where utils.load_env_variables() hasn't run yet.
+        # For simplicity, we'll assume utils.load_env_variables() runs early in your FastAPI app.
+        print("LocationManager will use OpenCage Geocoding via app.utils.geocode_location.")
 
     async def geocode_location(self, location_name: str) -> dict | None:
         """
-        Geocodes a location name to latitude and longitude using Google Geocoding API.
+        Geocodes a location name to latitude and longitude using OpenCage Geocoding API (via utils.py).
         Returns a dictionary with 'latitude', 'longitude', and 'address' or None if unsuccessful.
-        Will return None if API key is not valid or billing not enabled.
         """
-        if not self.geocoder_initialized:
-            print("Google Geocoding service not initialized or API key missing. Cannot geocode.")
-            return None
+        # Call the geocode_location from utils.py
+        coords = geocode_location(location_name) # This is a blocking call if not awaited
+        if coords:
+            lat, lon = coords
+            # OpenCage doesn't directly return a formatted address in the same way,
+            # you might need to adjust or perform a reverse geocode if you absolutely need it here.
+            # For simplicity, we'll just return lat/lon and a dummy address for now.
+            return {
+                "latitude": lat,
+                "longitude": lon,
+                "address": f"Geocoded for {location_name}" # Placeholder for formatted address
+            }
+        return None
 
-        base_url = "https://maps.googleapis.com/maps/api/geocode/json"
-        params = {
-            "address": location_name,
-            "key": self.google_api_key
-        }
-
-        try:
-            response = requests.get(base_url, params=params)
-            response.raise_for_status() 
-            data = response.json()
-
-            if data.get("status") == "OK" and data.get("results"):
-                first_result = data["results"][0]
-                latitude = first_result['geometry']['location']['lat']
-                longitude = first_result['geometry']['location']['lng']
-                formatted_address = first_result['formatted_address']
-                return {
-                    "latitude": latitude,
-                    "longitude": longitude,
-                    "address": formatted_address
-                }
-            else:
-                print(f"Google Geocoding failed for: {location_name}. Status: {data.get('status')}. Message: {data.get('error_message', 'No error message provided')}")
-                return None
-        except requests.exceptions.RequestException as e:
-            print(f"Error calling Google Geocoding API for '{location_name}': {e}. This often means API key issues or billing not enabled.")
-            return None
-        except Exception as e:
-            print(f"An unexpected error occurred during Google Geocoding API call: {e}")
-            return None
-
+# Keep _search_google_places as is, but understand it will only work with billing.
+# It's okay to leave it because search_local_services has the fallback.
 def _search_google_places(query: str, location_coords: tuple = None, radius: int = 5000) -> list:
     """
     Searches Google Places API for establishments.
@@ -61,7 +48,7 @@ def _search_google_places(query: str, location_coords: tuple = None, radius: int
     """
     api_key = os.getenv("GOOGLE_PLACES_API_KEY")
     if not api_key:
-        print("WARNING: GOOGLE_PLACES_API_KEY not found. Google Places search disabled.")
+        print("WARNING: GOOGLE_PLACES_API_KEY not found. Google Places search disabled. (Billing probably not enabled).")
         return []
 
     base_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
@@ -91,7 +78,7 @@ def _search_google_places(query: str, location_coords: tuple = None, radius: int
                 })
             return places
         else:
-            print(f"Google Places search failed for: '{query}'. Status: {data.get('status')}. Message: {data.get('error_message', 'No error message provided')}")
+            print(f"Google Places search failed for: {query}. Status: {data.get('status')}. Message: {data.get('error_message', 'No error message provided')}. (Billing likely not enabled).")
             return []
     except requests.exceptions.RequestException as e:
         print(f"Error calling Google Places API for '{query}': {e}. This often means API key issues or billing not enabled.")
@@ -104,17 +91,19 @@ def _search_google_places(query: str, location_coords: tuple = None, radius: int
 async def search_local_services(service_type: str, location_coords: tuple = None, location_name: str = "") -> list:
     """
     Searches for local services based on type, optionally using geocoded coordinates.
-    Prioritizes Google Places API if GOOGLE_PLACES_API_KEY is available and valid.
-    Falls back to mock data if not.
+    Attempts Google Places API (requires GOOGLE_PLACES_API_KEY and active billing).
+    Falls back to mock data if Google Places fails or isn't configured/billed.
     """
+    # Keep the GOOGLE_PLACES_API_KEY check. If it exists AND is billed, it will try Google.
+    # Otherwise, it will fall back to mock data as desired.
     google_places_api_key = os.getenv("GOOGLE_PLACES_API_KEY")
     if google_places_api_key:
-        print(f"Attempting to search '{service_type}' via Google Places API (will only work if API key is valid and billed)...")
+        print(f"Attempting to search '{service_type}' via Google Places API (requires valid API key and active billing)...")
         results = _search_google_places(service_type, location_coords)
         if results:
             return results
 
-    print(f"Falling back to mock services for '{service_type}' (Google API likely failed or not configured)...")
+    print(f"Falling back to mock services for '{service_type}' (Google Places API likely failed, not configured, or billing not enabled)...")
     mock_services = {
         "police station": [
             {"name": "Johannesburg Central Police Station", "address": "123 Main St, Johannesburg", "rating": 4.0},
@@ -146,32 +135,35 @@ async def search_local_services(service_type: str, location_coords: tuple = None
     return results
 
 if __name__ == "__main__":
-
+    from dotenv import load_dotenv
+    load_dotenv() # Load env vars for local testing
 
     async def test_geocoding_and_search():
-        location_manager = LocationManager()
-        johannesburg_coords = None
+        # Ensure OPENCAGE_API_KEY is in your .env for this test
+        location_manager = LocationManager() # This will now rely on utils.geocode_location
+
         johannesburg_geocode_data = await location_manager.geocode_location("Johannesburg")
+        johannesburg_coords = None
         if johannesburg_geocode_data:
             johannesburg_coords = (johannesburg_geocode_data['latitude'], johannesburg_geocode_data['longitude'])
-            print(f"Johannesburg geocoded: {johannesburg_geocode_data}")
+            print(f"Johannesburg geocoded (via OpenCage): {johannesburg_geocode_data}")
         else:
-            print("Johannesburg geocoding failed, using dummy coords for testing search fallback.")
+            print("Johannesburg geocoding failed (OpenCage issue or API key missing). Using dummy coords for testing search fallback.")
             johannesburg_coords = (-26.2041, 28.0473) 
 
-
-        cape_town_coords = None
         cape_town_geocode_data = await location_manager.geocode_location("Cape Town")
+        cape_town_coords = None
         if cape_town_geocode_data:
             cape_town_coords = (cape_town_geocode_data['latitude'], cape_town_geocode_data['longitude'])
-            print(f"Cape Town geocoded: {cape_town_geocode_data}")
+            print(f"Cape Town geocoded (via OpenCage): {cape_town_geocode_data}")
         else:
-            print("Cape Town geocoding failed, using dummy coords for testing search fallback.")
+            print("Cape Town geocoding failed (OpenCage issue or API key missing). Using dummy coords for testing search fallback.")
             cape_town_coords = (-33.9249, 18.4241) 
 
 
-        print("\n--- Testing search_local_services (will use Google Places/mock) ---")
+        print("\n--- Testing search_local_services (will attempt Google Places, then fallback to mock) ---")
        
+        # These will attempt Google Places but likely fall back to mock unless billing is enabled.
         police_stations_jhb = await search_local_services('police station', location_coords=johannesburg_coords, location_name="Johannesburg")
         print(f"Police Stations in Johannesburg: {police_stations_jhb}")
 
