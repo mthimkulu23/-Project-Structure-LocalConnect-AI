@@ -1,30 +1,33 @@
 from langchain.chains import LLMChain
-from langchain_google_genai import ChatGoogleGenerativeAI
+# from langchain_google_genai import ChatGoogleGenerativeAI # GOOD: This line is commented out/removed
+from langchain_groq import ChatGroq # GOOD: This line is added
 from langchain_core.prompts import PromptTemplate
 import os
 from dotenv import load_dotenv # Make sure this is imported if you're loading .env
 
 
-
-
 class LocalConnectChatbot:
     def __init__(self):
+        # Load environment variables from .env file (if not already loaded by Render)
+        # It's good practice to have this for local development
+        load_dotenv() # IMPORTANT: Make sure your .env file locally contains GROQ_API_KEY if you test locally
 
         try:
-
-            self.llm = ChatGoogleGenerativeAI(
-                model="gemini-1.5-flash",
-                google_api_key=os.getenv("GOOGLE_API_KEY"), 
+            # Initialize Groq client instead of Google Gemini
+            self.llm = ChatGroq(
+                # Groq will automatically look for GROQ_API_KEY environment variable.
+                # Choose one of Groq's supported models that have generous free tiers.
+                # 'llama3-8b-8192' or 'gemma2-9b-it' are excellent choices for free tier usage.
+                # 'llama3-70b-8192' also has a 14,400 RPD limit!
+                model="llama3-8b-8192", # Let's start with this very efficient and fast model
                 temperature=0.7
             )
-            print("Google Gemini client initialized.")
+            print("Groq LLM client initialized.")
         except Exception as e:
-            print(f"Error initializing Google Gemini client: {e}")
+            print(f"Error initializing Groq LLM client: {e}")
             self.llm = None
 
-        # Remove or comment out this line:
-        # self.location_manager = LocationManager()
-
+        # self.location_manager = LocationManager() # Keep this commented out as before
 
         self.prompt_template = PromptTemplate(
             input_variables=["query", "location_info"],
@@ -39,36 +42,32 @@ class LocalConnectChatbot:
             )
         )
 
-
+        # Removed the DeprecationWarning fix for LangChain, assuming you want to keep the current structure for now
+        # You might see a new warning from LangChain about LLMChain, but it should still work.
         if self.llm:
             self.llm_chain = LLMChain(prompt=self.prompt_template, llm=self.llm)
         else:
             self.llm_chain = None
             print("LLMChain not initialized due to LLM failure.")
 
-
     async def process_query(self, query: str, location: str = "current_location") -> str:
         location_info = ""
-        
+
         if location and location != "current_location":
             location_info = location
         else:
             location_info = "Not provided or default" # Or "" if you prefer to omit
 
-
         if not self.llm_chain:
             return "I'm sorry, the AI service is not properly initialized. Please check backend logs."
 
         try:
-        
-
-            print("Proceeding with general LLM query.")
+            print("Proceeding with LLM query via Groq.")
             response = await self.llm_chain.arun(query=query, location_info=location_info)
             return response
         except Exception as e:
-            if "insufficient_quota" in str(e).lower() or "quota" in str(e).lower():
-                error_message = "I'm sorry, the Google API quota has been exceeded or billing is not set up. Please check your Google Cloud Console."
-            else:
-                error_message = f"An error occurred while processing your query: {e}"
+            # Modify error handling to be more generic, as 'quota' specific to Google might not apply to Groq
+            # Though Groq does have rate limits, the error message might be different.
+            error_message = f"An error occurred while processing your query with Groq: {e}"
             print(f"Error during LLM or service call: {e}")
             return error_message
