@@ -5,8 +5,8 @@ LocalConnect AI is an intelligent chatbot designed to help users discover local 
 ## Features
 
 * **Natural Language Understanding (NLU):** Capable of understanding complex user queries like "Police Station in Johannesburg" or "Top-rated dentists near me" to extract intent and entities.
-* **AI-Powered Responses:** Leverages advanced large language models, specifically **Google Gemini**, for generating conversational, context-aware, and informative responses, as well as general knowledge queries.
-* **Service Discovery Integration:** Designed to integrate with external APIs (currently uses a mocked interface for demonstration, but easily expandable to real-world services like Google Places, Yelp, etc.) to find and retrieve relevant local service information.
+* **AI-Powered Responses:** Leverages advanced large language models, specifically **Groq's Llama 3 models**, for generating conversational, context-aware, and informative responses, as well as general knowledge queries.
+* **Service Discovery Integration:** Designed to integrate with external APIs (currently uses OpenCage for geocoding and a mocked interface for service searching for demonstration, but easily expandable to real-world services like Google Places, Yelp, etc. if billing is enabled for those services) to find and retrieve relevant local service information.
 * **Interactive Conversational Interface:** Built with Streamlit to provide a user-friendly and real-time chat experience, mimicking a natural conversation flow.
 * **Scalable Backend:** Utilizes FastAPI for a robust, high-performance, and easily scalable API to handle chatbot requests and integrate with AI models.
 
@@ -15,13 +15,11 @@ LocalConnect AI is an intelligent chatbot designed to help users discover local 
 * **Python:** The core programming language for the entire project.
 * **FastAPI:** A modern, fast (high-performance) web framework for building the RESTful API backend.
 * **Streamlit:** An open-source app framework for quickly building and deploying interactive web applications, serving as the chatbot's frontend.
-* **`langchain-google-genai`**: Python library for seamless integration with Google's Generative AI models, including Gemini.
+* **`langchain-groq`**: Python library for seamless integration with Groq's super-fast LLM inference API.
 * **`python-dotenv`:** For securely managing environment variables (like API keys) during local development.
-* **`requests`:** A fundamental HTTP library for making requests to external APIs (e.g., to the FastAPI backend from Streamlit, or mock service calls).
+* **`requests`:** A fundamental HTTP library for making requests to external APIs (e.g., to the FastAPI backend from Streamlit, or to OpenCage Geocoding).
 * **`uvicorn`:** An ultra-fast ASGI server, used to run the FastAPI application.
-* **`httpx`:** A modern, async-friendly HTTP client for making requests.
 * **`langchain-core`**: Core abstractions for LangChain, providing fundamental building blocks for LLM applications.
-* **`langsmith`**: For debugging, testing, evaluating, and monitoring LLM applications.
 
 ## Project Structure
 
@@ -41,7 +39,7 @@ Follow these steps to set up and run LocalConnect AI on your local machine for d
 
 1.  **Clone the repository:**
     ```bash
-    git clone [ https://github.com/mthimkulu23/-Project-Structure-LocalConnect-AI]
+    git clone [https://github.com/mthimkulu23/-Project-Structure-LocalConnect-AI](https://github.com/mthimkulu23/-Project-Structure-LocalConnect-AI)
     cd -Project-Structure-LocalConnect-AI
     ```
 
@@ -63,16 +61,21 @@ Follow these steps to set up and run LocalConnect AI on your local machine for d
     ```
 
 4.  **Set up Environment Variables:**
-    Create a file named `.env` in the root directory of your project (e.g., `LocalConnect-AI/.env`). This file will store your sensitive API keys.
+    Create a file named `.env` in the root directory of your project (e.g., `LocalConnect-AI/.env`). This file will store your sensitive API keys for local development.
 
     ```env
     # .env file content
-    GOOGLE_API_KEY="YOUR_GEMINI_API_KEY_STARTING_WITH_AIzaSy"
-    # Example: GOOGLE_API_KEY="AIzaSyD_example_key_1234567890ABCDEF"
-    # You might also need your backend URL for the frontend if not hardcoded:
-    # FASTAPI_BACKEND_URL="[http://127.0.0.1:8000/api](http://127.0.0.1:8000/api)"
+    GROQ_API_KEY="gsk_YOUR_GROQ_API_KEY_HERE"
+    # Example: GROQ_API_KEY="gsk_abcdef1234567890abcdef1234567890"
+    
+    OPENCAGE_API_KEY="YOUR_OPENCAGE_API_KEY_HERE"
+    # Example: OPENCAGE_API_KEY="your_opencage_key_xyz"
+
+    # The backend URL for the frontend when running locally
+    FASTAPI_BACKEND_URL="http://localhost:8000"
     ```
-    * **Get your Google Gemini API Key:** Obtain this key from [Google for Developers](https://ai.google.dev/). This is the `AIzaSy...` string.
+    * **Get your Groq API Key:** Obtain this key from [Groq Console](https://console.groq.com/keys).
+    * **Get your OpenCage Geocoding API Key:** Obtain this key from [OpenCage Geocoding](https://opencagedata.com/developers).
 
 ### Running the Application Locally
 
@@ -96,12 +99,10 @@ LocalConnect AI consists of two independently runnable components: a FastAPI bac
 
 Once both the FastAPI backend and the Streamlit frontend are running:
 
-1.  Navigate to the Streamlit app URL in your browser (e.g., `http://0.0.0.0:8501`).
+1.  Navigate to the Streamlit app URL in your browser (e.g., `http://localhost:8501`).
 2.  Type your natural language query into the chat input field at the bottom of the interface.
 3.  Press `Enter` or click the send button.
-4.  The chatbot will process your request, communicate with the AI model (Gemini), and provide a relevant response, or an error message if an issue occurs.
-
-
+4.  The chatbot will process your request, communicate with the AI model (Groq), and provide a relevant response, or an error message if an issue occurs.
 
 ## Contributing
 
