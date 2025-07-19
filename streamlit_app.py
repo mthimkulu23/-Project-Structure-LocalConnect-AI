@@ -125,14 +125,14 @@ def call_backend_api_with_retry(query, location, retries=5, delay=5):
 
 
 for message in st.session_state.messages:
-    avatar = "🧑‍💻" if message["role"] == "user" else "🤖"
+    avatar = "🧑" if message["role"] == "user" else "🤖"
     with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
 
 if prompt := st.chat_input("Ask me Anything,"):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user", avatar="🧑‍💻"):
+    with st.chat_message("user", avatar="🧑"):
         st.markdown(prompt)
 
     # Use the hardcoded location based on your previous messages
