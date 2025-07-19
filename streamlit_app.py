@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 import requests
 import os
@@ -95,41 +93,49 @@ if "messages" not in st.session_state:
 
 
 for message in st.session_state.messages:
-
     avatar = "🧑‍💻" if message["role"] == "user" else "🤖"
     with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
 
 if prompt := st.chat_input("Ask me Anything,"):
-  
+    
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user", avatar="🧑‍💻"):
         st.markdown(prompt)
 
- 
+    
     payload = {"query": prompt, "location": "current_location"}
-  
+    
 
     with st.chat_message("assistant", avatar="🤖"):
         with st.spinner("Thinking..."):
             try:
-            
+                
                 response = requests.post(f"{FASTAPI_BACKEND_URL}/api/query/", json=payload)
                 response.raise_for_status() 
-                chatbot_response = response.json().get("response", "I'm sorry, I couldn't process your request.")
+                
+                # --- FIX START ---
+                # Your FastAPI backend is sending a plain string, not a JSON object
+                # So, directly use response.text
+                chatbot_response = response.text 
+                # --- FIX END ---
+
             except requests.exceptions.ConnectionError:
                 chatbot_response = "I'm sorry, I can't connect to the AI service right now. Please ensure the backend is running and accessible at `FASTAPI_BACKEND_URL`."
             except requests.exceptions.HTTPError as e:
-                st.error(f"Error from API: {e}. Detail: {response.json().get('detail', 'No detail provided')}")
+                # --- FIX START ---
+                # For HTTP errors, if there's any text in the response, use it.
+                error_detail_text = response.text if response else "No detailed error message provided."
+                st.error(f"Error from API: {e}. Detail: {error_detail_text}")
                 chatbot_response = "An error occurred while processing your request. Please try again."
+                # --- FIX END ---
             except Exception as e:
                 chatbot_response = f"An unexpected error occurred: {e}"
 
         st.markdown(chatbot_response)
-  
+    
     st.session_state.messages.append({"role": "assistant", "content": chatbot_response})
-
 
 
 st.markdown(
