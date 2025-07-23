@@ -1,8 +1,7 @@
-streamlit # <-- CORRECTED THIS LINE
 requests
 python-dotenv
 fastapi
 uvicorn
 langchain
-langchain-core # Ensure this is present if your langchain version needs it
-langchain-groq # <--- New package for Groq
+langchain-core
+langchain-groq
