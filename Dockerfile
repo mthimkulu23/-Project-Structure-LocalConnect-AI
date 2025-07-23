@@ -20,7 +20,7 @@ FROM python:3.12-slim-bookworm
 # Set environment variables for runtime
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
-# Add /usr/local/bin to PATH where Python executables are typically installed
+# This ENV PATH line is good, but uvicorn isn't in /usr/local/bin, so we need to find its actual path.
 ENV PATH="/usr/local/bin:$PATH"
 
 # Set the working directory in the container for the runtime stage
@@ -32,11 +32,13 @@ COPY --from=build-env /usr/local/lib/python3.12/site-packages /usr/local/lib/pyt
 # Copy the rest of your application code
 COPY . .
 
-# --- START DEBUGGING LINES ---
-# Print the current PATH variable
+# --- START DEBUGGING LINES (MODIFIED) ---
+# Print the current PATH variable (already confirmed, but keeping for completeness)
 RUN echo "Current PATH: $PATH"
-# Attempt to locate the uvicorn executable
-RUN which uvicorn || echo "uvicorn not found in PATH"
+# Attempt to locate the uvicorn executable using which (expected to fail again, confirms our understanding)
+RUN which uvicorn || echo "uvicorn not found in PATH by 'which', searching now..."
+# NEW: Find uvicorn executable in common Python installation paths
+RUN find /usr/local -type f -name "uvicorn" -executable -print || echo "Uvicorn executable not found in /usr/local tree."
 # --- END DEBUGGING LINES ---
 
 # Set the command to run your FastAPI application with Uvicorn via sh -c
