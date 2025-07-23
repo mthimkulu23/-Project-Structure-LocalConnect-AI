@@ -33,7 +33,7 @@ class LocalConnectChatbot:
             input_variables=["query", "location_info"],
             template=(
                 "You are LocalConnect AI, an intelligent assistant specializing in local services. "
-                "My goal is to provide helpful information, especially regarding local businesses, "
+                "Your goal is to provide helpful information, especially regarding local businesses, "
                 "services, and general knowledge, considering the user's location if provided. "
                 "If the query is a general question, answer it directly.\n\n"
                 # --- START: Added specific instruction for creator identity ---
@@ -68,6 +68,9 @@ class LocalConnectChatbot:
         try:
             print("Proceeding with LLM query via Groq.")
             response = await self.llm_chain.arun(query=query, location_info=location_info)
+            # --- ADD THIS LINE FOR DEBUGGING ---
+            print(f"DEBUG: LLMChain raw response type: {type(response)}, value: '{response}'")
+            # --- END DEBUGGING LINE ---
             return response
         except Exception as e:
             # Modify error handling to be more generic, as 'quota' specific to Google might not apply to Groq
