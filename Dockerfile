@@ -32,13 +32,17 @@ COPY --from=build-env /usr/local/lib/python3.12/site-packages /usr/local/lib/pyt
 # Copy the rest of your application code
 COPY . .
 
-# --- START DEBUGGING LINES (MODIFIED) ---
-# Print the current PATH variable (already confirmed, but keeping for completeness)
+# --- START DEBUGGING LINES (MODIFIED AGAIN) ---
+# Print the current PATH variable (keeping for sanity check)
 RUN echo "Current PATH: $PATH"
-# Attempt to locate the uvicorn executable using which (expected to fail again, confirms our understanding)
-RUN which uvicorn || echo "uvicorn not found in PATH by 'which', searching now..."
-# NEW: Find uvicorn executable in common Python installation paths
-RUN find /usr/local -type f -name "uvicorn" -executable -print || echo "Uvicorn executable not found in /usr/local tree."
+# Attempt to locate the uvicorn executable using which (still expected to fail)
+RUN which uvicorn || echo "uvicorn not found in PATH by 'which'. Proceeding with broader search..."
+# NEW: Find uvicorn executable across the entire filesystem.
+# We pipe stderr to stdout to catch any permission errors or other messages from 'find'.
+RUN find / -type f -name "uvicorn" -executable -print 2>&1 || echo "Uvicorn executable not found anywhere as executable (even after full system search)."
+# NEW: List the contents of the uvicorn package directory. This will confirm if the package itself is there.
+# This should show the __init__.py, cli.py etc.
+RUN ls -l /usr/local/lib/python3.12/site-packages/uvicorn/ || echo "Uvicorn Python package directory not found."
 # --- END DEBUGGING LINES ---
 
 # Set the command to run your FastAPI application with Uvicorn via sh -c
