@@ -1,4 +1,18 @@
-# Your existing Dockerfile content above...
+# Stage 1: Build environment
+FROM python:3.12-slim-bookworm AS build-env
+
+# Set environment variables
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
+
+# Set the working directory in the container for the build stage
+WORKDIR /app
+
+# Copy only the requirements file first to leverage Docker cache
+COPY requirements.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Runtime environment
 FROM python:3.12-slim-bookworm
