@@ -17,6 +17,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Stage 2: Runtime environment
 FROM python:3.12-slim-bookworm
 
+# Set environment variables for runtime
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
+# Add /usr/local/bin to PATH where Python executables are typically installed
+ENV PATH="/usr/local/bin:$PATH"
+
 # Set the working directory in the container for the runtime stage
 WORKDIR /app
 
