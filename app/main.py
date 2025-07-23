@@ -1,9 +1,11 @@
+print("DEBUG: app/main.py is being executed.") # ADD THIS LINE AT THE VERY TOP
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 
-load_dotenv() # This line is important to load environment variables
+load_dotenv()
 
 from app.api import router as api_router
 
