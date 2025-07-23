@@ -1,6 +1,5 @@
 from langchain.chains import LLMChain
-# from langchain_google_genai import ChatGoogleGenerativeAI # GOOD: This line is commented out/removed
-from langchain_groq import ChatGroq # GOOD: This line is added
+from langchain_groq import ChatGroq 
 from langchain_core.prompts import PromptTemplate
 import os
 from dotenv import load_dotenv # Make sure this is imported if you're loading .env
@@ -8,18 +7,13 @@ from dotenv import load_dotenv # Make sure this is imported if you're loading .e
 
 class LocalConnectChatbot:
     def __init__(self):
-        # Load environment variables from .env file (if not already loaded by Render)
-        # It's good practice to have this for local development
-        load_dotenv() # IMPORTANT: Make sure your .env file locally contains GROQ_API_KEY if you test locally
+        
+        load_dotenv() 
 
         try:
-            # Initialize Groq client instead of Google Gemini
             self.llm = ChatGroq(
-                # Groq will automatically look for GROQ_API_KEY environment variable.
-                # Choose one of Groq's supported models that have generous free tiers.
-                # 'llama3-8b-8192' or 'gemma2-9b-it' are excellent choices for free tier usage.
-                # 'llama3-70b-8192' also has a 14,400 RPD limit!
-                model="llama3-8b-8192", # Let's start with this very efficient and fast model
+               
+                model="llama3-8b-8192", 
                 temperature=0.7
             )
             print("Groq LLM client initialized.")
