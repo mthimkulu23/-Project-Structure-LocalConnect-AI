@@ -3,20 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-
-# --- START TEMPORARY DEBUGGING LINES ---
-groq_key_val = os.getenv("GROQ_API_KEY")
-if groq_key_val:
-    print(f"DEBUG: GROQ_API_KEY loaded successfully. Starts with: {groq_key_val[:5]}...")
-else:
-    print("ERROR: GROQ_API_KEY is NOT set in environment variables!")
-    # Optionally, you can add a sys.exit(1) here if you want to force it to fail
-    # if the key is missing, making the error more explicit.
-    # import sys
-    # sys.exit(1)
-# --- END TEMPORARY DEBUGGING LINES ---
-
+load_dotenv() # This line is important to load environment variables
 
 from app.api import router as api_router
 
