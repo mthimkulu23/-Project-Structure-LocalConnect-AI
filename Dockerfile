@@ -1,5 +1,6 @@
-
-FROM python:3.10-slim-buster AS build-env
+# --- Stage 1: Build Environment ---
+# Use a full Python image to install dependencies
+FROM python:3.13-slim-buster AS build-env
 
 # Set environment variables
 ENV PYTHONUNBUFFERED 1
@@ -16,17 +17,17 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # --- Stage 2: Production Environment ---
 # Use a much smaller image for the final application
-FROM python:3.10-slim-buster
+FROM python:3.13-slim-buster
 
 # Set environment variables
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
-
+# Set the working directory
 WORKDIR /app
 
-
-COPY --from=build-env /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages/
+# Copy installed packages from the build-env stage
+COPY --from=build-env /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages/
 
 # Copy the rest of your application code
 COPY . .
