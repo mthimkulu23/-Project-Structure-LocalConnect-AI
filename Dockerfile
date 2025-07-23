@@ -26,5 +26,5 @@ COPY --from=build-env /usr/local/lib/python3.12/site-packages /usr/local/lib/pyt
 # Copy the rest of your application code
 COPY . .
 
-# Set the command to run your FastAPI application with Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Set the command to just check uvicorn version for debugging
+CMD ["uvicorn", "--version"]
