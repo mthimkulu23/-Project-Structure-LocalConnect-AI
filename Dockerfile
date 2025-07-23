@@ -26,5 +26,5 @@ COPY --from=build-env /usr/local/lib/python3.12/site-packages /usr/local/lib/pyt
 # Copy the rest of your application code
 COPY . .
 
-# Set the command to just check uvicorn version for debugging
-CMD ["uvicorn", "--version"]
+# Set the command to check python version for debugging, explicitly via shell
+CMD ["sh", "-c", "python --version"]
